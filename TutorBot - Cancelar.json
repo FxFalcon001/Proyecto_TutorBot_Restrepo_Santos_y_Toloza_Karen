@@ -1,0 +1,234 @@
+{
+  "name": "TutorBot - Cancelar.",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4731ad8b-024e-4671-bf8f-742cd6a223ad",
+      "name": "Telegram Trigger",
+      "webhookId": "8912e8a2-d5f6-4eb3-b4d3-6c76da89574d",
+      "credentials": {
+        "telegramApi": {
+          "id": "oNVjPPCp3oVBOizK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8d66bf9a-cbb6-4df9-8a3c-12c990ca36d1",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "/cancelar ",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "f5e6024d-80f8-4b38-a543-34112831cdef",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $('Telegram Trigger').first().json.message;\nconst partes = (msg.text || '').trim().split(/\\s+/);\nreturn [{ json: { chat_id: msg.chat.id, id_tutoria: (partes[1] || '').toUpperCase() } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        -96
+      ],
+      "id": "cf344999-6704-490b-8c0d-2304b08ff21c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1UhN2FapCztSSnYwyBo5mtBDibW6pT04E1M9wqKkpIRE",
+          "mode": "list",
+          "cachedResultName": "TutorBot_DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UhN2FapCztSSnYwyBo5mtBDibW6pT04E1M9wqKkpIRE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1153101375,
+          "mode": "list",
+          "cachedResultName": "TUTORIAS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UhN2FapCztSSnYwyBo5mtBDibW6pT04E1M9wqKkpIRE/edit#gid=1153101375"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "id_estudiante",
+              "lookupValue": "={{ $json.chat_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "8c8fa7a3-8a3f-49b1-8c65-4dab631fb78c",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SkVSATC2zlbzv1ap",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cmd = $('Analizar comando').first().json;\nconst filas = $input.all().map(i => i.json).filter(f => f.id_tutoria);\nconst activas = filas.filter(f => ['Solicitada', 'Asignada', 'Confirmada'].includes(f.estado));\n\nif (!cmd.id_tutoria) {\n  if (!activas.length) {\n    return [{ json: { accion: 'mensaje', chat_id: cmd.chat_id, texto: 'No tienes tutorías para cancelar.' } }];\n  }\n  const lista = activas.map(f => `• ${f.id_tutoria}: ${f.materia} — ${f.fecha} ${f.hora} (${f.estado})`).join('\\n');\n  return [{ json: { accion: 'mensaje', chat_id: cmd.chat_id,\n    texto: '¿Cuál quieres cancelar? Escribe /cancelar y el código, por ejemplo: /cancelar ' + activas[0].id_tutoria + '\\n\\n' + lista } }];\n}\n\nconst t = activas.find(f => f.id_tutoria === cmd.id_tutoria);\nif (!t) {\n  return [{ json: { accion: 'mensaje', chat_id: cmd.chat_id, texto: 'No encontré una tutoría activa tuya con el código ' + cmd.id_tutoria + '.' } }];\n}\n\nconst dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];\nconst [y, m, d] = String(t.fecha).split('-').map(Number);\nconst dia = dias[new Date(y, m - 1, d).getDay()];\n\nreturn [{ json: { accion: 'cancelar', chat_id: cmd.chat_id, id_tutoria: t.id_tutoria,\n  id_tutor: t.id_tutor, dia_semana: dia, hora: t.hora, materia: t.materia, fecha: t.fecha } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -96
+      ],
+      "id": "368fb9ee-6c2a-4e49-b2a2-ddab514cc1f4",
+      "name": "Code in JavaScript1 validar"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "afb64474-b03e-4a94-ba3f-bf684b067307",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1056,
+        -96
+      ],
+      "id": "3b9eeb56-8969-46d2-bbc0-49f5bc34c617",
+      "name": "If1 cancelar"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1 validar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1 validar": {
+      "main": [
+        [
+          {
+            "node": "If1 cancelar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8b215ef8-de87-4a4f-b0a2-6f03a07c61cf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e9a9977a78d313f87e186896bc037888746d751def17f1744d563157df58b47a"
+  },
+  "nodeGroups": [],
+  "id": "rFkNAxU3qZcDm99I",
+  "tags": []
+}
