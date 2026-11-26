@@ -1,0 +1,200 @@
+{
+  "name": "TutorBot - Consultar",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a2d02d14-3d24-46c0-8839-37e50192e615",
+      "name": "Telegram Trigger",
+      "webhookId": "3bd0eee7-29eb-430f-bf66-02c0e936b1d7",
+      "credentials": {
+        "telegramApi": {
+          "id": "oNVjPPCp3oVBOizK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1UhN2FapCztSSnYwyBo5mtBDibW6pT04E1M9wqKkpIRE",
+          "mode": "list",
+          "cachedResultName": "TutorBot_DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UhN2FapCztSSnYwyBo5mtBDibW6pT04E1M9wqKkpIRE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1153101375,
+          "mode": "list",
+          "cachedResultName": "TUTORIAS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1UhN2FapCztSSnYwyBo5mtBDibW6pT04E1M9wqKkpIRE/edit#gid=1153101375"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "id_estudiante",
+              "lookupValue": "={{ $('Telegram Trigger').first().json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        0
+      ],
+      "id": "f76ddf3d-3340-4700-81ac-2df7570eb402",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SkVSATC2zlbzv1ap",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "={{ $json.texto }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        0
+      ],
+      "id": "8e1cc384-34c5-4245-8077-d5bf9f7cd602",
+      "name": "Send a text message",
+      "webhookId": "5386c3b0-e9b5-4a7b-80ef-311bd0e10a26",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "oNVjPPCp3oVBOizK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8d66bf9a-cbb6-4df9-8a3c-12c990ca36d1",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "/consultar",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "fb10358f-18dc-4fab-ad72-4b1c03edefe1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all();\n\nif (!rows.length || !rows[0].json.id_tutoria) {\n  return [{ json: { texto: 'No tienes tutorías registradas.' } }];\n}\n\nconst lineas = rows.map(r =>\n  `• ${r.json.materia} — ${r.json.fecha} ${r.json.hora} (${r.json.estado})`\n);\n\nreturn [{ json: { texto: 'Tus tutorías:\\n' + lineas.join('\\n') } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "f98e188b-fe18-4cef-92dd-959e02683f91",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a52f84dc-647a-4182-8ee3-71a9de8a5625",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e9a9977a78d313f87e186896bc037888746d751def17f1744d563157df58b47a"
+  },
+  "nodeGroups": [],
+  "id": "dqSEWWivsy46S5Sk",
+  "tags": []
+}
