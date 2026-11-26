@@ -1,0 +1,77 @@
+{
+  "name": "Tutorbot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "07577264-deec-4649-93c4-38fa5bd85563",
+      "name": "Telegram Trigger",
+      "webhookId": "6b6649b1-c18c-47ba-b827-45b7d08f7517",
+      "credentials": {
+        "telegramApi": {
+          "id": "tSPoYp4aAS45lEAN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "={{ $json.message.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "120b3b79-a9b8-492c-a2f2-cecd6aba779b",
+      "name": "Send a text message",
+      "webhookId": "ede54659-e14e-4a30-89f0-eb5521d5d2b8",
+      "credentials": {
+        "telegramApi": {
+          "id": "tSPoYp4aAS45lEAN",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5de6bf31-5999-4735-9773-e324c9266b10",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3afe8072e607d4390a3331ff6a4f4f3864f416eee56e25f8a990880264afc686"
+  },
+  "nodeGroups": [],
+  "id": "KYtaC5CxhSMqa5oq",
+  "tags": []
+}
