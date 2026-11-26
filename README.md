@@ -45,7 +45,7 @@ Get row(s) in sheet: obtiene las filas correspondientes desde Google Sheets.
 
 Code in JavaScript1 validar: verifica si existe una tutoría activa asociada al usuario y al código indicado, calcula la información relevante (dia_semana, fecha, hora, materia, etc.) y define la acción a ejecutar (cancelar o mensaje).
 
-If1 cancelar: evalúa si la cancelación procede:
+3. If1 cancelar: evalúa si la cancelación procede:
 
 Rama true: actualiza el estado de la fila en Google Sheets (Update row in sheet) y notifica al usuario por Telegram (Send a text message1).
 
